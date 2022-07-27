@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <!-- 加载关节控制yaml文件 -->
+    <rosparam file="$(find suv_description)/config/joint_controller.yaml" command="load" />
+    <!-- load the controllers -->
+    <node   name="controller_manager" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/suv" 
+            args="left_rear_wheel_velocity_controller right_rear_wheel_velocity_controller
+                  left_front_wheel_velocity_controller right_front_wheel_velocity_controller
+                  left_front_steering_hinge_position_controller right_front_steering_hinge_position_controller
+                  joint_state_controller" />
+    <!--运行joint_state_publisher节点，发布机器人关节状态-->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen">
+        <remap from="/joint_states" to="/suv/joint_states" />
+    </node>
+    <!-- 订阅ackermann并发布到关节 -->
+    <node pkg="suv_description" type="servo_commands.py" name="servo_commands" output="screen" />
+
+    <!-- 将ackermann转化为cmd_vel -->
+    <node pkg="suv_description" type="ackermann_to_twist.py" name="ackermann_to_twist" output="screen"/>
+
+    <!-- 发布里程计信息 -->
+    <node pkg="suv_description" name="gazebo_odometry_node" type="gazebo_odometry.py"/> 
+</launch> 

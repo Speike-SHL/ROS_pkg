@@ -1,0 +1,4 @@
+#控制键盘控制节点的速度，
+keyboard_teleop:
+  speed: 1
+  max_steering_angle: 0.4

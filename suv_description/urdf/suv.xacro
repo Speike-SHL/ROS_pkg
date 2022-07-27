@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="suv" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:include filename="$(find suv_description)/urdf/gazebo/transmission.xacro" />  
+    <xacro:include filename="$(find suv_description)/urdf/gazebo/link_color.xacro" /> 
+    <xacro:include filename="$(find suv_description)/urdf/gazebo/imu.xacro" /> 
+
+<!-- *************************************************参数定义******************************************************* -->
+    <!-- 质心到前轴距离 -->
+    <xacro:property name="massCenter_to_Faxis" value="0.28" />
+    <!-- 质心到后轴距离 -->
+    <xacro:property name="massCenter_to_Raxis" value="0.34" />
+    <!-- 质心到地面距离 -->
+    <xacro:property name="massCenter_to_ground" value="0.232" />
+    <!-- 前后轮长度 -->
+    <xacro:property name="Faxis_to_Raxis" value="0.62" />
+    <!-- 左右轮距 -->
+    <xacro:property name="carTread" value="0.47" />
+    <!-- 轮胎直径 -->
+    <xacro:property name="tire_diameter" value="0.23" />
+    <!-- 轮胎宽度 -->
+    <xacro:property name="tire_width" value="0.078" />
+    <!-- 车体长度 -->
+    <xacro:property name="car_length" value="1" />
+    <!-- 车体宽度 -->
+    <xacro:property name="car_width" value="0.55" />
+    <!-- 车体高度 -->
+    <xacro:property name="car_height" value="0.4" />
+    <!-- 车体重量 -->
+    <xacro:property name="car_weight" value="30.24" />
+<!-- *************************************************颜色定义******************************************************* -->
+    <xacro:property name="Green">
+        <material name="Green">
+            <color rgba="0.26667 0.58824 0.28235 1" />
+        </material>
+    </xacro:property>
+    <xacro:property name="Black">
+        <material name="Black">
+            <color rgba="0.0 0.0 0.0 1.0" />
+        </material>
+    </xacro:property>
+    <xacro:property name="Grey">
+        <material name="Grey">
+            <color rgba="0.3 0.3 0.3 1" />
+        </material>
+    </xacro:property>
+    <xacro:property name="White">
+        <material name="White">
+            <color rgba="1.0 1.0 1.0 1.0" />
+        </material>
+    </xacro:property>
+    <xacro:property name="Orange">
+        <material name="Orange">
+            <color rgba="1.0 ${108/255} ${10/255} 1.0"/>
+        </material>
+    </xacro:property>
+
+
+<!-- ************************************************base_link***************************************************** -->
+    <link name="base_footprint"></link>
+    <joint name="base_link_to_footprint" type="fixed">
+        <parent link="base_footprint" />
+        <child link="base_link" />
+        <origin xyz="0 0 ${massCenter_to_ground}" rpy="0 0 0" />
+    </joint>
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <!-- <box size="${car_length} 0.28 0.10" /> -->
+                <mesh filename="package://suv_description/meshes/base_link.STL" />
+            </geometry>
+            <origin xyz="-0.07 0 0" rpy="0 0 -1.57" />
+            <xacro:insert_block name="Green" />
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${car_length} 0.28 0.10" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <inertial> 
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="25"/>
+            <inertia ixx="2.1042"  ixy="0"  ixz="0" iyy="2.2467" iyz="0" izz="0.1842" />
+        </inertial> 
+    </link>
+
+<!-- **************************************************四个轮子***************************************************** -->
+    <!-- 后轮宏定义，y代表轮子所处象限,1为左，-1为右 -->
+    <xacro:macro name="RearWheel" params="wheel_name y">
+        <joint name="${wheel_name}_wheel_joint" type="continuous">
+            <parent link="base_link" />
+            <child link="${wheel_name}_wheel" />
+            <origin xyz="${-massCenter_to_Raxis} ${y*carTread/2} ${-(massCenter_to_ground-tire_diameter/2)}" />
+            <axis xyz="0 1 0" />
+            <limit effort="10" velocity="1000" />
+        </joint>
+        <link name="${wheel_name}_wheel">
+            <visual>
+                <geometry>
+                    <!-- <cylinder radius="${tire_diameter/2}" length="${tire_width}" /> -->
+                    <mesh filename="package://suv_description/meshes/wheel_rl_link.STL" />
+                </geometry>
+                <!-- <origin xyz="0 0 0" rpy="1.57 0 0" /> -->
+                <origin xyz="0 ${-0.03*y} 0" rpy="1.57 0 ${-1.57*y}" />
+                <xacro:insert_block name="Grey" />
+            </visual>
+            <collision>
+                <geometry>
+                    <cylinder radius="${tire_diameter/2}" length="${tire_width}" />
+                </geometry>
+                <origin xyz="0 0 0" rpy="1.57 0 0" />
+            </collision>
+            <inertial> 
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="1"/>
+                <inertia ixx="4.41E-03"  ixy="0"  ixz="0" iyy="7.81E-03" iyz="0" izz="4.41E-03" />
+            </inertial> 
+        </link>
+    </xacro:macro>
+    <xacro:RearWheel wheel_name="left_rear" y="1" />
+    <xacro:RearWheel wheel_name="right_rear" y="-1" />
+
+    <!-- 前轮及转向铰链宏定义，y代表轮子所处象限,1为左，-1为右 -->
+    <xacro:macro name="FrontWheel" params="wheel_name y">
+        <joint name="${wheel_name}_steering_hinge_joint" type="revolute">
+            <parent link="base_link" />
+            <child link="${wheel_name}_steering_hinge" />
+            <origin xyz="${massCenter_to_Faxis} ${y*carTread/2} ${-(massCenter_to_ground-tire_diameter/2)}" />
+            <axis xyz="0 0 1" />
+            <limit lower="-0.6" upper="0.6" effort="5.0" velocity="1000.0" />
+        </joint>    
+        <link name="${wheel_name}_steering_hinge">
+            <visual>
+                <geometry>
+                    <cylinder radius="0.01" length="0.03" />
+                </geometry>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <xacro:insert_block name="Orange" />
+            </visual>
+            <collision>
+                <geometry>
+                    <cylinder radius="0.01" length="0.03" />
+                </geometry>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+            </collision>
+            <inertial> 
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="0.5"/>
+                <inertia ixx="5E-05"  ixy="0"  ixz="0" iyy="5E-05" iyz="0" izz="2.5E-05" />
+            </inertial> 
+        </link>
+        <joint name="${wheel_name}_wheel_joint" type="continuous">
+            <parent link="${wheel_name}_steering_hinge" />
+            <child link="${wheel_name}_wheel" />
+            <origin xyz="0 0 0" />
+            <axis xyz="0 1 0" />
+            <limit effort="10" velocity="1000" />
+        </joint>
+        <link name="${wheel_name}_wheel">
+            <visual>
+                <geometry>
+                    <!-- <cylinder radius="${tire_diameter/2}" length="${tire_width}" /> -->
+                    <mesh filename="package://suv_description/meshes/wheel_fl_link.STL" />
+                </geometry>
+                <!-- <origin xyz="0 0 0" rpy="1.57 0 0" /> -->
+                <origin xyz="0 ${-0.03*y} 0" rpy="1.57 0 ${-1.57*y}" />
+                <xacro:insert_block name="Grey" />
+            </visual>
+            <collision>
+                <geometry>
+                    <cylinder radius="${tire_diameter/2}" length="${tire_width}" />
+                </geometry>
+                <origin xyz="0 0 0" rpy="1.57 0 0" />
+            </collision>
+            <inertial> 
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <mass value="1"/>
+                <inertia ixx="4.41E-03"  ixy="0"  ixz="0" iyy="7.81E-03" iyz="0" izz="4.41E-03" />
+            </inertial> 
+        </link>
+    </xacro:macro>
+    <xacro:FrontWheel wheel_name="left_front" y="1" />
+    <xacro:FrontWheel wheel_name="right_front" y="-1" />
+
+<!-- **************************************************传感器link************************************************** -->
+    <!-- imu -->
+    <joint name="imu_joint" type="fixed">
+        <parent link="base_link" />
+        <child link="imu_link" />
+        <origin xyz="0 0 0.07" />
+        <axis xyz="0 0 1" />
+    </joint>
+    <link name="imu_link">
+        <visual>
+            <geometry>
+                <box size="0.05 0.05 0.01"/>
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <xacro:insert_block name="Black" />
+        </visual>
+        <collision>
+            <geometry>
+                <box size="0.05 0.05 0.01"/>
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <inertial> 
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <mass value="0.04"/>
+            <inertia ixx="8.67E-06"  ixy="0"  ixz="0" iyy="1.67E-05" iyz="0" izz="8.67E-06" />
+        </inertial> 
+    </link>
+
+    <!-- ZED -->
+    <joint name="ZED_joint" type="fixed">
+        <origin xyz="0.041 0 0.196" rpy="0 0 0" />
+        <parent link="base_link" />
+        <child link="ZED_link" />
+        <axis xyz="0 0 0" />
+      </joint>
+    <link name="ZED_link">
+        <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <mass value="0.2" />
+            <inertia ixx="2.167E-05" ixy="0" ixz="0" iyy="3.9E-04" iyz="0" izz="3.817E-04" />
+        </inertial>
+        <visual>
+            <geometry>
+                <!-- <box size="0.03 0.15 0.02"/> -->
+                <mesh filename="package://suv_description/meshes/ZED_link.STL" />
+            </geometry>
+            <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+            <origin xyz="0 0 -0.01" rpy="0 0 1.57" />
+            <xacro:insert_block name="Orange" />
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.03 0.15 0.02"/>
+            </geometry>
+        </collision>
+      </link>
+
+</robot>
