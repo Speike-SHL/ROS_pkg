@@ -1,4 +1,16 @@
+# 环境准备
 
+安装一些功能包:
+```
+sudo apt install ros-$ROS_DISTRO-joint-state-publisher-gui
+sudo apt install ros-$ROS_DISTRO-ros-control
+sudo apt install ros-$ROS_DISTRO-ros-controllers
+sudo apt install ros-$ROS_DISTRO-gmapping
+sudo apt install ros-$ROS_DISTRO-ackermann-msgs
+sudo apt install ros-$ROS_DISTRO-navigation
+sudo apt install ros-$ROS_DISTRO-teb-local-planner
+```
+确保自己的python能够import tkinter
 
 # 命令
 
