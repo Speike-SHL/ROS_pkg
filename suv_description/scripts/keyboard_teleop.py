@@ -82,7 +82,7 @@ def main():
     global max_steering_angle
     max_velocity = rospy.get_param("~speed",2.0)
     max_steering_angle = rospy.get_param("~max_steering_angle", 0.6)
- 
+    
     state_pub = rospy.Publisher(
         "/ackermann_cmd_mux/output", AckermannDriveStamped, queue_size=1
     )
@@ -107,4 +107,4 @@ def main():
 if __name__ == "__main__":
     rospy.init_node("keyboard_teleop", disable_signals=True)
     signal.signal(signal.SIGINT, lambda s, f: shutdown())
-    main() 
+    main()
