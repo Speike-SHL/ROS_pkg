@@ -9,8 +9,9 @@ sudo apt install ros-$ROS_DISTRO-gmapping
 sudo apt install ros-$ROS_DISTRO-ackermann-msgs
 sudo apt install ros-$ROS_DISTRO-navigation
 sudo apt install ros-$ROS_DISTRO-teb-local-planner
+sudo apt-get install unicode
 ```
-确保自己的python能够import tkinter
+确保自己的python能够import Tkinter
 
 # 命令
 

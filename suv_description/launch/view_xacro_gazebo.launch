@@ -3,8 +3,8 @@
   <!-- 运行gazebo仿真环境 -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <!-- <arg name="world_name" value="$(find suv_description)/world/football_field.world" /> -->
-    <!-- <arg name="world_name" value="$(find suv_description)/world/football_field_empty.world" /> -->
-    <arg name="world_name" value="$(find suv_description)/world/raceway.world" />
+    <arg name="world_name" value="$(find suv_description)/world/football_field_empty.world" />
+    <!-- <arg name="world_name" value="$(find suv_description)/world/raceway.world" /> -->
     <arg name="debug" value="false" />
     <arg name="gui" value="true" />
     <arg name="paused" value="false" />
