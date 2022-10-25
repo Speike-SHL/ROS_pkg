@@ -28,5 +28,8 @@
     <gazebo reference="imu_link">
         <material>Gazebo/White</material>
     </gazebo>    
+    <gazebo reference="ZED_link">
+        <material>Gazebo/Grey</material>
+    </gazebo>
 
 </robot>

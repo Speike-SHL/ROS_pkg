@@ -2,9 +2,8 @@
 <launch>
   <!-- 运行gazebo仿真环境 -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <!-- <arg name="world_name" value="$(find suv_description)/world/football_field.world" /> -->
-    <arg name="world_name" value="$(find suv_description)/world/football_field_empty.world" />
-    <!-- <arg name="world_name" value="$(find suv_description)/world/raceway.world" /> -->
+    <!-- <arg name="world_name" value="$(find suv_description)/world/football_field_empty.world" /> -->
+    <arg name="world_name" value="$(find suv_description)/world/ISCAS_Museum.world" />
     <arg name="debug" value="false" />
     <arg name="gui" value="true" />
     <arg name="paused" value="false" />
@@ -30,6 +29,9 @@
   <!--Launch the simulation joystick control-->
   <rosparam command="load" file="$(find suv_description)/config/keyboard_teleop.yaml" />
   <node pkg="suv_description" type="keyboard_teleop.py" name="keyboard_teleop" />
+
+  <!-- 改变深度相机点云方向 -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 -1.57 0 -1.57 /ZED_link /trans_depth" />
 
   <!-- <node name="fake_joint_calibration" pkg="rostopic" type="rostopic" args="pub /calibrated std_msgs/Bool true" /> -->
 </launch>
